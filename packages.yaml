@@ -102,6 +102,7 @@ debian_12:
     - neofetch
     - software-properties-common
     - sudo
+    - sqlite3
     - tmux
     - tree
     - unzip
