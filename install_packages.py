@@ -13,6 +13,32 @@ CACHE_UPDATE_INTERVAL = 7200  # Mettre à jour le cache des paquets toutes les 2
 
 import apt
 
+def find_file(filename):
+    """
+    Cherche le fichier en suivant un ordre défini :
+    - Répertoire de l'utilisateur actuel
+    - Répertoire du script
+    - Répertoire HOME de l'utilisateur
+    Retourne le chemin complet du fichier s'il est trouvé, sinon None.
+    """
+    # Répertoire de l'utilisateur actuel
+    current_dir = os.getcwd()
+    if os.path.exists(os.path.join(current_dir, filename)):
+        return os.path.join(current_dir, filename)
+    
+    # Répertoire du script
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    if os.path.exists(os.path.join(script_dir, filename)):
+        return os.path.join(script_dir, filename)
+    
+    # Répertoire HOME de l'utilisateur
+    home_dir = os.path.expanduser("~")
+    if os.path.exists(os.path.join(home_dir, filename)):
+        return os.path.join(home_dir, filename)
+    
+    return None
+
+
 def install_packages(packages):
     """
     Installe les packages spécifiés en utilisant la bibliothèque python3-apt.
@@ -170,9 +196,14 @@ def main():
     # Vérifier que le fichier spécifié existe
     if not os.path.exists(args.file):
         if args.file == 'packages.yaml':
-            print("Fichier par défaut 'packages.yaml' non trouvé!")
-            display_help(parser)
-            sys.exit(1)
+            # Si le fichier n'est pas spécifié par l'utilisateur, recherchez-le en utilisant find_file
+            found_file_path = find_file(args.file)
+            if found_file_path:
+                args.file = found_file_path
+            else:
+                print("Fichier par défaut 'packages.yaml' non trouvé!")
+                display_help(parser)
+                sys.exit(1)
         else:
             print(f"Fichier '{args.file}' non trouvé!")
             sys.exit(1)
